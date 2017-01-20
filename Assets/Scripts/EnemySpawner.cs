@@ -7,22 +7,14 @@ public class EnemySpawner : MonoBehaviour {
 	public float width = 10.0f;
 	public float height = 5.0f;
 	public float speed = 1.0f;
+	public float spawnDelay = 0.5f;
 
 	private float xMin, xMax;
 	private bool movingRight = true;
 
 	// Use this for initialization
 	void Start () {
-		// Read this as every child transform under the EnemySpawner gameObject
-		// This will set the position of the enemy prefabs we are instantaiting to the position of the Position gameObjects we created in the editor
-		foreach(Transform child in transform)
-		{
-			// Instantiate an enemy at the origin and make sure it sits as a child and in the center of the Position gameObject
-			GameObject enemy = Instantiate(enemyPrefab, child.position, Quaternion.identity) as GameObject;
-			// enemy.transform is the transform of the enemy prefab. Whereas child is the transform of Position gameObject
-			// Used to make sure our hierarchy is clean
-			enemy.transform.parent = child;
-		}
+		SpawnUntilFull();
 
 		// Set the boundary of the play space for the enemy spawner
 		float distanceToCamera = this.transform.position.z - Camera.main.transform.position.z;
@@ -55,6 +47,76 @@ public class EnemySpawner : MonoBehaviour {
 		{
 			movingRight = false;
 		}
+
+		if (AllMembersDead())
+		{
+			Debug.Log("Empty Formation");
+			SpawnUntilFull();
+		}
+	}
+
+	void SpawnEnemies()
+	{
+		// Read this as every child transform under the EnemySpawner gameObject
+		// This will set the position of the enemy prefabs we are instantaiting to the position of the Position gameObjects we created in the editor
+		foreach (Transform position in transform)
+		{
+			// Instantiate an enemy at the origin and make sure it sits as a child and in the center of the Position gameObject
+			GameObject enemySpawner = Instantiate(enemyPrefab, position.position, Quaternion.identity) as GameObject;
+			// enemy.transform is the transform of the enemy prefab. Whereas child is the transform of Position gameObject
+			// Used to make sure our hierarchy is clean
+			enemySpawner.transform.parent = position;
+		}
+	}
+
+	void SpawnUntilFull()
+	{
+		// Store the next free position
+		Transform freePosition = NextFreePosition();
+
+		// And create a new enemy at that new free position if it exists
+		if (freePosition)
+		{
+			GameObject enemySpawner = Instantiate(enemyPrefab, freePosition.position, Quaternion.identity) as GameObject;
+			enemySpawner.transform.parent = freePosition;
+
+			// Add a delay so they don't spawn immediately
+			Invoke("SpawnUntilFull", spawnDelay);
+		}
+	}
+
+	Transform NextFreePosition()
+	{
+		foreach (Transform position in transform)
+		{
+			// If there is no enemy go under the position go, then return a position
+			// This means there's a free position
+			if (position.childCount == 0)
+			{
+				return position;
+			}
+		}
+
+		// If it has an enemy go, then return null
+		return null;
+	}
+
+	// Check if the transform of all the child object (i.e. if the Position gameobject is empty) 
+	// are empty. If they are, return true
+	bool AllMembersDead()
+	{
+		// Going over every child transform of the transform of the parent
+		// in this case, the EnemySpawner
+		foreach(Transform position in transform)
+		{
+			// Check if a child exists in position. If it does, then an enemey exists
+			if (position.childCount > 0)
+			{
+				return false;
+			}
+		}
+
+		return true;
 	}
 
 	private void OnDrawGizmos()

@@ -12,9 +12,12 @@ public class EnemyBehaviour : MonoBehaviour {
 
 	private void Update()
 	{
-		// 
+		// Determine the probability of an enemy firing by multiplying the "time in between frames" by the "rate of fire"
+		// That will determine the probability.
 		float probablility = Time.deltaTime * shotsPerSecond;
 
+		// We then check if a random value between 0 and 1 will be under that probability.
+		// And if it is, we fire. 
 		if (Random.value < probablility)
 		{
 			Fire();
@@ -23,6 +26,7 @@ public class EnemyBehaviour : MonoBehaviour {
 
 	void Fire()
 	{
+		// Similar to how we shoot a laser as a player
 		Vector3 startPosition = this.transform.position + new Vector3(0.0f, -1.0f, 0.0f);
 		GameObject beam = Instantiate(projectile, startPosition, Quaternion.identity) as GameObject;
 		beam.GetComponent<Rigidbody2D>().velocity = new Vector3(0.0f, -projectileSpeed, 0.0f);
