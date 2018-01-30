@@ -10,6 +10,16 @@ public class EnemyBehaviour : MonoBehaviour {
 	// Frequency of fire
 	public float shotsPerSecond = 0.5f;
 
+	// Number of points an enemy is worth
+	public int scoreValue = 10;
+
+	private void Start()
+	{
+		// Getting the Score game object. We do it this way because we're creating the enemies at runtime
+		// We're using GetComponent to make sure that we're finding "Score" in the correct class
+		GameObject.Find("Score").GetComponent<ScoreKeeper>();
+	}
+
 	private void Update()
 	{
 		// Determine the probability of an enemy firing by multiplying the "time in between frames" by the "rate of fire"
@@ -50,6 +60,8 @@ public class EnemyBehaviour : MonoBehaviour {
 			if (health <= 0.0f)
 			{
 				Destroy(gameObject);
+
+
 			}
 		}
 	}
